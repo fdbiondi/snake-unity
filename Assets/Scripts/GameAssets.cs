@@ -7,11 +7,19 @@ public class GameAssets : MonoBehaviour
     [SerializeField]
     private Sprite _snakeHeadSprite;
 
+    [SerializeField]
+    private Sprite _foodSprite;
+
     public static GameAssets instance;
 
     public Sprite snakeHeadSprite
     {
         get { return _snakeHeadSprite; }
+    }
+
+    public Sprite foodSprite
+    {
+        get { return _foodSprite; }
     }
 
     private void Awake()

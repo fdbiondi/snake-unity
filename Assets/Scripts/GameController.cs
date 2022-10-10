@@ -6,24 +6,15 @@ using CodeMonkey.Utils;
 
 public class GameController : MonoBehaviour
 {
-    // Start is called before the first frame update
+    [SerializeField]
+    private Snake _snake;
+    private LevelGrid _levelGrid;
+
     void Start()
     {
-        /* int number = 0;
-        FunctionPeriodic.Create(
-            () =>
-            {
-                CMDebug.TextPopupMouse("Ding! " + number);
-                number++;
-            },
-            .3f
-        ); */
-        GameObject snakeGameObject = new GameObject();
-        SpriteRenderer snakeSpriteRenderer = snakeGameObject.AddComponent<SpriteRenderer>();
+        _levelGrid = new LevelGrid(20, 20);
 
-        snakeSpriteRenderer.sprite = GameAssets.instance.snakeHeadSprite;
+        _snake.Setup(_levelGrid);
+        _levelGrid.Setup(_snake);
     }
-
-    // Update is called once per frame
-    void Update() { }
 }

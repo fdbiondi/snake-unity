@@ -8,12 +8,18 @@ public class Snake : MonoBehaviour
     private Vector2Int _gridMoveDirection;
     private float _gridMoveTimer;
     private float _gridMoveTimerMax;
+    private LevelGrid _levelGrid;
+
+    public void Setup(LevelGrid levelGrid)
+    {
+        _levelGrid = levelGrid;
+    }
 
     private void Awake()
     {
         _gridPosition = new Vector2Int(10, 10);
         _gridMoveDirection = new Vector2Int(1, 0);
-        _gridMoveTimerMax = 1f;
+        _gridMoveTimerMax = .3f;
         _gridMoveTimer = _gridMoveTimerMax;
     }
 
@@ -27,23 +33,23 @@ public class Snake : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.UpArrow) && _gridMoveDirection.y != -1)
         {
-            _gridMoveDirection.y = 1;
             _gridMoveDirection.x = 0;
+            _gridMoveDirection.y = 1;
         }
         if (Input.GetKeyDown(KeyCode.DownArrow) && _gridMoveDirection.y != 1)
         {
-            _gridMoveDirection.y = -1;
             _gridMoveDirection.x = 0;
+            _gridMoveDirection.y = -1;
         }
         if (Input.GetKeyDown(KeyCode.LeftArrow) && _gridMoveDirection.x != 1)
         {
-            _gridMoveDirection.y = 0;
             _gridMoveDirection.x = -1;
+            _gridMoveDirection.y = 0;
         }
         if (Input.GetKeyDown(KeyCode.RightArrow) && _gridMoveDirection.x != -1)
         {
-            _gridMoveDirection.y = 0;
             _gridMoveDirection.x = 1;
+            _gridMoveDirection.y = 0;
         }
     }
 
@@ -58,6 +64,8 @@ public class Snake : MonoBehaviour
 
             transform.position = new Vector3(_gridPosition.x, _gridPosition.y);
             transform.eulerAngles = new Vector3(0, 0, GetAngleFromVector(_gridMoveDirection) - 90);
+
+            _levelGrid.SnakeMoved(_gridPosition);
         }
     }
 
@@ -71,5 +79,10 @@ public class Snake : MonoBehaviour
         }
 
         return n;
+    }
+
+    public Vector2Int GetGridPosition()
+    {
+        return _gridPosition;
     }
 }
