@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using CodeMonkey;
 
 public class Snake : MonoBehaviour
 {
@@ -9,6 +10,8 @@ public class Snake : MonoBehaviour
     private float _gridMoveTimer;
     private float _gridMoveTimerMax;
     private LevelGrid _levelGrid;
+    private int _snakeBodySize;
+    private List<Vector2Int> _snakeMovePositionList;
 
     public void Setup(LevelGrid levelGrid)
     {
@@ -21,6 +24,9 @@ public class Snake : MonoBehaviour
         _gridMoveDirection = new Vector2Int(1, 0);
         _gridMoveTimerMax = .3f;
         _gridMoveTimer = _gridMoveTimerMax;
+
+        _snakeMovePositionList = new List<Vector2Int>();
+        _snakeBodySize = 1;
     }
 
     private void Update()
@@ -59,8 +65,21 @@ public class Snake : MonoBehaviour
 
         if (_gridMoveTimer >= _gridMoveTimerMax)
         {
-            _gridPosition += _gridMoveDirection;
             _gridMoveTimer -= _gridMoveTimerMax;
+
+            _snakeMovePositionList.Insert(0, _gridPosition);
+
+            _gridPosition += _gridMoveDirection;
+
+            if (_snakeMovePositionList.Count >= _snakeBodySize + 1)
+            {
+                _snakeMovePositionList.RemoveAt(_snakeBodySize);
+            }
+
+            for (int i = 0; i < _snakeMovePositionList.Count; i++)
+            {
+                AddTale(_snakeMovePositionList[i]);
+            }
 
             transform.position = new Vector3(_gridPosition.x, _gridPosition.y);
             transform.eulerAngles = new Vector3(0, 0, GetAngleFromVector(_gridMoveDirection) - 90);
@@ -84,5 +103,42 @@ public class Snake : MonoBehaviour
     public Vector2Int GetGridPosition()
     {
         return _gridPosition;
+    }
+
+    private void AddTale(Vector2Int snakeMovePosition)
+    {
+        GameObject snakeTaleGameObj = CreateTale(snakeMovePosition);
+
+        FunctionTimer.Create(
+            () =>
+            {
+                Object.Destroy(snakeTaleGameObj);
+            },
+            _gridMoveTimerMax
+        );
+    }
+
+    private GameObject CreateTale(Vector2Int snakeMovePosition)
+    {
+        Vector3 localPosition = new Vector3(snakeMovePosition.x, snakeMovePosition.y);
+        Vector3 localScale = Vector3.one * .5f;
+        Sprite sprite = Assets.i.s_White;
+        int sortingOrder = (int)(5000 - localPosition.y);
+
+        GameObject snakeTaleGameObj = new GameObject("SnakeTale", typeof(SpriteRenderer));
+        Transform transform = snakeTaleGameObj.transform;
+        transform.SetParent(null, false);
+        transform.localPosition = localPosition;
+        transform.localScale = localScale;
+
+        SpriteRenderer spriteRenderer = snakeTaleGameObj.GetComponent<SpriteRenderer>();
+        spriteRenderer.sprite = sprite;
+        spriteRenderer.sortingOrder = sortingOrder;
+        spriteRenderer.color = Color.white;
+
+        transform = snakeTaleGameObj.transform;
+        spriteRenderer = snakeTaleGameObj.GetComponent<SpriteRenderer>();
+
+        return snakeTaleGameObj;
     }
 }
