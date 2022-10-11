@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using CodeMonkey;
 
 public class Snake : MonoBehaviour
 {
@@ -12,6 +11,7 @@ public class Snake : MonoBehaviour
     private LevelGrid _levelGrid;
     private int _snakeBodySize;
     private List<Vector2Int> _snakeMovePositionList;
+    private List<Transform> _snakeTransformList;
 
     public void Setup(LevelGrid levelGrid)
     {
@@ -26,7 +26,9 @@ public class Snake : MonoBehaviour
         _gridMoveTimer = _gridMoveTimerMax;
 
         _snakeMovePositionList = new List<Vector2Int>();
-        _snakeBodySize = 1;
+        _snakeBodySize = 0;
+
+        _snakeTransformList = new List<Transform>();
     }
 
     private void Update()
@@ -66,25 +68,25 @@ public class Snake : MonoBehaviour
         if (_gridMoveTimer >= _gridMoveTimerMax)
         {
             _gridMoveTimer -= _gridMoveTimerMax;
-
             _snakeMovePositionList.Insert(0, _gridPosition);
-
             _gridPosition += _gridMoveDirection;
+
+            bool snakeAteFood = _levelGrid.TrySnakeEatFood(_gridPosition);
+            if (snakeAteFood)
+            {
+                _snakeBodySize++;
+                CreateSnakeBody();
+            }
 
             if (_snakeMovePositionList.Count >= _snakeBodySize + 1)
             {
-                _snakeMovePositionList.RemoveAt(_snakeBodySize);
-            }
-
-            for (int i = 0; i < _snakeMovePositionList.Count; i++)
-            {
-                AddTale(_snakeMovePositionList[i]);
+                _snakeMovePositionList.RemoveAt(_snakeMovePositionList.Count - 1);
             }
 
             transform.position = new Vector3(_gridPosition.x, _gridPosition.y);
             transform.eulerAngles = new Vector3(0, 0, GetAngleFromVector(_gridMoveDirection) - 90);
 
-            _levelGrid.SnakeMoved(_gridPosition);
+            MoveSnakeBody();
         }
     }
 
@@ -100,45 +102,43 @@ public class Snake : MonoBehaviour
         return n;
     }
 
+    private void CreateSnakeBody()
+    {
+        GameObject snakeBodyGameObject = new GameObject("SnakeBody", typeof(SpriteRenderer));
+
+        snakeBodyGameObject.GetComponent<SpriteRenderer>().sprite = GameAssets
+            .instance
+            .snakeBodySprite;
+
+        snakeBodyGameObject.GetComponent<SpriteRenderer>().sortingOrder =
+            -_snakeTransformList.Count;
+
+        _snakeTransformList.Add(snakeBodyGameObject.transform);
+    }
+
+    private void MoveSnakeBody()
+    {
+        for (int i = 0; i < _snakeTransformList.Count; i++)
+        {
+            _snakeTransformList[i].position = new Vector3(
+                _snakeMovePositionList[i].x,
+                _snakeMovePositionList[i].y
+            );
+        }
+    }
+
     public Vector2Int GetGridPosition()
     {
         return _gridPosition;
     }
 
-    private void AddTale(Vector2Int snakeMovePosition)
+    // Return complete snake Head + Body
+    public List<Vector2Int> GetFullSnakePositionGridList()
     {
-        GameObject snakeTaleGameObj = CreateTale(snakeMovePosition);
+        List<Vector2Int> gridPositionList = new List<Vector2Int>() { _gridPosition };
 
-        FunctionTimer.Create(
-            () =>
-            {
-                Object.Destroy(snakeTaleGameObj);
-            },
-            _gridMoveTimerMax
-        );
-    }
+        gridPositionList.AddRange(_snakeMovePositionList);
 
-    private GameObject CreateTale(Vector2Int snakeMovePosition)
-    {
-        Vector3 localPosition = new Vector3(snakeMovePosition.x, snakeMovePosition.y);
-        Vector3 localScale = Vector3.one * .5f;
-        Sprite sprite = Assets.i.s_White;
-        int sortingOrder = (int)(5000 - localPosition.y);
-
-        GameObject snakeTaleGameObj = new GameObject("SnakeTale", typeof(SpriteRenderer));
-        Transform transform = snakeTaleGameObj.transform;
-        transform.SetParent(null, false);
-        transform.localPosition = localPosition;
-        transform.localScale = localScale;
-
-        SpriteRenderer spriteRenderer = snakeTaleGameObj.GetComponent<SpriteRenderer>();
-        spriteRenderer.sprite = sprite;
-        spriteRenderer.sortingOrder = sortingOrder;
-        spriteRenderer.color = Color.white;
-
-        transform = snakeTaleGameObj.transform;
-        spriteRenderer = snakeTaleGameObj.GetComponent<SpriteRenderer>();
-
-        return snakeTaleGameObj;
+        return gridPositionList;
     }
 }

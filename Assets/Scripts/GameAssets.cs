@@ -8,6 +8,9 @@ public class GameAssets : MonoBehaviour
     private Sprite _snakeHeadSprite;
 
     [SerializeField]
+    private Sprite _snakeBodySprite;
+
+    [SerializeField]
     private Sprite _foodSprite;
 
     public static GameAssets instance;
@@ -15,6 +18,11 @@ public class GameAssets : MonoBehaviour
     public Sprite snakeHeadSprite
     {
         get { return _snakeHeadSprite; }
+    }
+
+    public Sprite snakeBodySprite
+    {
+        get { return _snakeBodySprite; }
     }
 
     public Sprite foodSprite
