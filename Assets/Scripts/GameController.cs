@@ -12,6 +12,9 @@ public class GameController : MonoBehaviour
 
     void Start()
     {
+        /* GameObject snakeGameObject = new GameObject();
+       SpriteRenderer snakeSpriteRenderer = snakeGameObject.AddComponent<SpriteRenderer>();
+       snakeSpriteRenderer.sprite = GameAssets.instance.snakeHeadSprite; */
         _levelGrid = new LevelGrid(20, 20);
 
         _snake.Setup(_levelGrid);

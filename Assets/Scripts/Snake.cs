@@ -11,7 +11,7 @@ public class Snake : MonoBehaviour
     private LevelGrid _levelGrid;
     private int _snakeBodySize;
     private List<Vector2Int> _snakeMovePositionList;
-    private List<Transform> _snakeTransformList;
+    private List<SnakeBodyPart> _snakeBodyPartList;
 
     public void Setup(LevelGrid levelGrid)
     {
@@ -28,7 +28,7 @@ public class Snake : MonoBehaviour
         _snakeMovePositionList = new List<Vector2Int>();
         _snakeBodySize = 0;
 
-        _snakeTransformList = new List<Transform>();
+        _snakeBodyPartList = new List<SnakeBodyPart>();
     }
 
     private void Update()
@@ -75,7 +75,7 @@ public class Snake : MonoBehaviour
             if (snakeAteFood)
             {
                 _snakeBodySize++;
-                CreateSnakeBody();
+                CreateSnakeBodyPart();
             }
 
             if (_snakeMovePositionList.Count >= _snakeBodySize + 1)
@@ -86,7 +86,7 @@ public class Snake : MonoBehaviour
             transform.position = new Vector3(_gridPosition.x, _gridPosition.y);
             transform.eulerAngles = new Vector3(0, 0, GetAngleFromVector(_gridMoveDirection) - 90);
 
-            MoveSnakeBody();
+            UpdateSnakeBodyParts();
         }
     }
 
@@ -102,28 +102,16 @@ public class Snake : MonoBehaviour
         return n;
     }
 
-    private void CreateSnakeBody()
+    private void CreateSnakeBodyPart()
     {
-        GameObject snakeBodyGameObject = new GameObject("SnakeBody", typeof(SpriteRenderer));
-
-        snakeBodyGameObject.GetComponent<SpriteRenderer>().sprite = GameAssets
-            .instance
-            .snakeBodySprite;
-
-        snakeBodyGameObject.GetComponent<SpriteRenderer>().sortingOrder =
-            -_snakeTransformList.Count;
-
-        _snakeTransformList.Add(snakeBodyGameObject.transform);
+        _snakeBodyPartList.Add(new SnakeBodyPart(_snakeBodyPartList.Count));
     }
 
-    private void MoveSnakeBody()
+    private void UpdateSnakeBodyParts()
     {
-        for (int i = 0; i < _snakeTransformList.Count; i++)
+        for (int i = 0; i < _snakeBodyPartList.Count; i++)
         {
-            _snakeTransformList[i].position = new Vector3(
-                _snakeMovePositionList[i].x,
-                _snakeMovePositionList[i].y
-            );
+            _snakeBodyPartList[i].SetGridPosition(_snakeMovePositionList[i]);
         }
     }
 
@@ -140,5 +128,24 @@ public class Snake : MonoBehaviour
         gridPositionList.AddRange(_snakeMovePositionList);
 
         return gridPositionList;
+    }
+
+    private class SnakeBodyPart
+    {
+        private Vector2Int _gridPosition;
+        private Transform _transform;
+
+        public SnakeBodyPart(int bodyIndex) {
+            GameObject snakeBodyGameObject = new GameObject("SnakeBody", typeof(SpriteRenderer));
+
+            snakeBodyGameObject.GetComponent<SpriteRenderer>().sprite = GameAssets.instance.snakeBodySprite;
+            snakeBodyGameObject.GetComponent<SpriteRenderer>().sortingOrder= -bodyIndex;
+            _transform = snakeBodyGameObject.transform;
+        }
+
+        public void SetGridPosition(Vector2Int gridPosition) {
+            _gridPosition = gridPosition;
+            _transform.position = new Vector3(gridPosition.x, gridPosition.y);
+        }
     }
 }
