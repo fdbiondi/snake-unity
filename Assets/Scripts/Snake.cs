@@ -116,8 +116,10 @@ public class Snake : MonoBehaviour
             }
 
             _gridPosition += gridMoveDirectionVector;
+            _gridPosition = _levelGrid.ValidateGridPosition(_gridPosition);
 
             bool snakeAteFood = _levelGrid.TrySnakeEatFood(_gridPosition);
+
             if (snakeAteFood)
             {
                 _snakeBodySize++;
