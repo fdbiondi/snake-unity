@@ -72,7 +72,13 @@ public class Snake : MonoBehaviour
         {
             _gridMoveTimer -= _gridMoveTimerMax;
 
-            SnakeMovePosition snakeMovePosition = new SnakeMovePosition(_gridPosition, _gridMoveDirection);
+            SnakeMovePosition previousSnakeMovePosition = null;
+
+            if (_snakeMovePositionList.Count > 0) {
+                previousSnakeMovePosition = _snakeMovePositionList[0];
+            }
+
+            SnakeMovePosition snakeMovePosition = new SnakeMovePosition(previousSnakeMovePosition, _gridPosition, _gridMoveDirection);
             _snakeMovePositionList.Insert(0, snakeMovePosition);
 
             Vector2Int gridMoveDirectionVector;
@@ -135,7 +141,7 @@ public class Snake : MonoBehaviour
     {
         for (int i = 0; i < _snakeBodyPartList.Count; i++)
         {
-            _snakeBodyPartList[i].SetSnakeMovePosition(_snakeMovePositionList[i].GetGridPosition());
+            _snakeBodyPartList[i].SetSnakeMovePosition(_snakeMovePositionList[i]);
         }
     }
 
@@ -185,16 +191,56 @@ public class Snake : MonoBehaviour
             switch (snakeMovePosition.GetDirection()) {
                 default:
                 case Direction.Up:
-                    angle = 0;
+                    switch (snakeMovePosition.GetPreviousDirection()) {
+                        case Direction.Left:
+                            angle = 45;
+                            break;
+                        case Direction.Right:
+                            angle = -45;
+                            break;
+                        default:
+                            angle = 0;
+                            break;
+                    }
                 break;
                 case Direction.Down:
-                    angle = 180;
-                break;
-                case Direction.Right:
-                    angle = 90;
+                    switch (snakeMovePosition.GetPreviousDirection()) {
+                        case Direction.Left:
+                            angle = 180 + 45;
+                            break;
+                        case Direction.Right:
+                            angle = 180 - 45;
+                            break;
+                        default:
+                            angle = 180;
+                            break;
+                    }
                 break;
                 case Direction.Left:
-                    angle = -90;
+                    switch (snakeMovePosition.GetPreviousDirection()) {
+                        case Direction.Down:
+                            angle = -45;
+                            break;
+                        case Direction.Up:
+                            angle = 45;
+                            break;
+                        default:
+                            angle = -90;
+                            break;
+                    }
+                break;
+                case Direction.Right:
+                    switch (snakeMovePosition.GetPreviousDirection()) {
+                        case Direction.Down:
+                            angle = 45;
+                            break;
+                        case Direction.Up:
+                            angle = -45;
+                            break;
+                        default:
+                            angle = 90;
+                            break;
+                    }
                 break;
             }
 
@@ -207,11 +253,13 @@ public class Snake : MonoBehaviour
      * */
     private class SnakeMovePosition
     {
+        private SnakeMovePosition _previousSnakeMovePosition;
         private Vector2Int _gridPosition;
 
         private Direction _direction;
 
-        public SnakeMovePosition(Vector2Int gridPosition, Direction direction)  {
+        public SnakeMovePosition(SnakeMovePosition previousSnakeMovePosition, Vector2Int gridPosition, Direction direction)  {
+            _previousSnakeMovePosition = previousSnakeMovePosition;
             _gridPosition = gridPosition;
             _direction = direction;
         }
@@ -224,6 +272,15 @@ public class Snake : MonoBehaviour
         public Direction GetDirection()
         {
             return _direction;
+        }
+
+        public Direction GetPreviousDirection()
+        {
+            if (_previousSnakeMovePosition == null) {
+                return Direction.Right;
+            }
+
+            return _previousSnakeMovePosition.GetDirection();
         }
     }
 }
