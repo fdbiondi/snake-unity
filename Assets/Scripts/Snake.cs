@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using CodeMonkey;
 
 public class Snake : MonoBehaviour
 {
@@ -10,6 +11,13 @@ public class Snake : MonoBehaviour
         Up,
         Down
     }
+
+    private enum State {
+        Alive,
+        Dead
+    }
+
+    private State _state;
 
     private Vector2Int _gridPosition;
     private Direction _gridMoveDirection;
@@ -36,12 +44,20 @@ public class Snake : MonoBehaviour
         _snakeBodySize = 0;
 
         _snakeBodyPartList = new List<SnakeBodyPart>();
+
+        _state = State.Alive;
     }
 
     private void Update()
     {
-        HandleInput();
-        HandleGridMovement();
+        switch (_state) {
+            case State.Alive:
+                HandleInput();
+                HandleGridMovement();
+                break;
+            case State.Dead:
+                break;
+        }
     }
 
     private void HandleInput()
@@ -113,10 +129,20 @@ public class Snake : MonoBehaviour
                 _snakeMovePositionList.RemoveAt(_snakeMovePositionList.Count - 1);
             }
 
+            UpdateSnakeBodyParts();
+
+            foreach (SnakeBodyPart snakeBodyPart in _snakeBodyPartList) {
+                Vector2Int snakeBodyPartGridPosition = snakeBodyPart.GetGridPosition();
+
+                if (_gridPosition == snakeBodyPartGridPosition) {
+                    CMDebug.TextPopup("Game Over!", transform.position);
+
+                    _state = State.Dead;
+                }
+            }
+
             transform.position = new Vector3(_gridPosition.x, _gridPosition.y);
             transform.eulerAngles = new Vector3(0, 0, GetAngleFromVector(gridMoveDirectionVector) - 90);
-
-            UpdateSnakeBodyParts();
         }
     }
 
@@ -253,6 +279,11 @@ public class Snake : MonoBehaviour
             }
 
             _transform.eulerAngles = new Vector3(0, 0, angle);
+        }
+
+        public Vector2Int GetGridPosition()
+        {
+            return _snakeMovePosition.GetGridPosition();
         }
     }
 
