@@ -16,12 +16,23 @@ public class GameController : MonoBehaviour
         InitializeStatic();
     }
 
-    void Start()
+    private void Start()
     {
         _levelGrid = new LevelGrid(20, 20);
 
         _snake.Setup(_levelGrid);
         _levelGrid.Setup(_snake);
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape)) {
+            if (GameController.IsGamePaused()) {
+                GameController.ResumeGame();
+            } else {
+                GameController.PauseGame();
+            }
+        }    
     }
 
     private static void InitializeStatic()
@@ -42,6 +53,24 @@ public class GameController : MonoBehaviour
     public static void SnakeDied()
     {
         GameOverWindow.ShowStatic();
+    }
+    
+    public static void ResumeGame()
+    {
+        PauseWindow.HideStatic();
 
+        Time.timeScale = 1f;
+    }
+    
+    public static void PauseGame()
+    {
+        PauseWindow.ShowStatic();
+
+        Time.timeScale = 0f;
+    }
+
+    public static bool IsGamePaused()
+    {
+        return Time.timeScale == 0f;
     }
 }
