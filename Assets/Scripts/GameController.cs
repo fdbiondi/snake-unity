@@ -1,8 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using CodeMonkey;
-using CodeMonkey.Utils;
 
 public class GameController : MonoBehaviour
 {
@@ -26,10 +22,6 @@ public class GameController : MonoBehaviour
 
         _snake.Setup(_levelGrid);
         _levelGrid.Setup(_snake);
-
-        CMDebug.ButtonUI(Vector2.zero, "Reload Scene", () => {
-            Loader.Load(Loader.Scene.GameScene);
-        });
     }
 
     private static void InitializeStatic()
@@ -45,5 +37,11 @@ public class GameController : MonoBehaviour
     public static void AddScore()
     {
         Score += 100;
+    }
+    
+    public static void SnakeDied()
+    {
+        GameOverWindow.ShowStatic();
+
     }
 }
