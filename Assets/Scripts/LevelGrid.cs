@@ -43,6 +43,8 @@ public class LevelGrid
             Object.Destroy(_foodGameObject);
             SpawnFood();
 
+            GameController.AddScore();
+
             return true;
         }
 
